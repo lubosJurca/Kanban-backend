@@ -1,0 +1,14 @@
+﻿namespace Kanban_backend.Models
+{
+    public class Subtask
+    {
+        public int Id { get; set; }
+        public int KanbanTaskId { get; set; }
+        public KanbanTask? KanbanTask { get; set; }
+        public required string Description { get; set; }
+        public int Order { get; set; }
+        public bool Done { get; set; }
+        public DateTime CreatedAt { get; set; } 
+        public DateTime UpdatedAt { get; set; }
+    }
+}
