@@ -17,7 +17,7 @@ namespace Kanban_backend.Repositories
         {
             board.CreatedAt = DateTime.UtcNow;
             board.UpdatedAt = DateTime.UtcNow;
-            await _boardContext.Boards.AddAsync(board);
+            _boardContext.Boards.Add(board);
             await _boardContext.SaveChangesAsync();
             return board;
         }
@@ -52,15 +52,10 @@ namespace Kanban_backend.Repositories
 
         public async Task<Board?> UpdateBoardAsync(Board board)
         {
-            var existingBoard = await _boardContext.Boards.FirstOrDefaultAsync(b => b.Id == board.Id);
+            board.UpdatedAt = DateTime.UtcNow;
+            await _boardContext.SaveChangesAsync(); // EF Core is tracking board and makes the update automatically, no need to call Update method
 
-            if (existingBoard == null) return null;
-
-            _boardContext.Entry(existingBoard).CurrentValues.SetValues(board);
-            existingBoard.UpdatedAt = DateTime.UtcNow;
-            await _boardContext.SaveChangesAsync();
-
-            return existingBoard;
+            return board;
         }
     }
 }
