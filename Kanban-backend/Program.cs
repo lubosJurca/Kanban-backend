@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IBoardRepository, BoardRepository >();
 builder.Services.AddScoped<IColumnRepository, ColumnRepository>();
 builder.Services.AddScoped<IKanbanTaskRepository, KanbanTaskRepository>();
+builder.Services.AddScoped<ISubtaskRepository, SubtaskRepository>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 //Add Controllers support
 builder.Services.AddControllers();

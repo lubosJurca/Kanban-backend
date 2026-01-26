@@ -81,9 +81,7 @@ namespace Kanban_backend.Controllers
             var column = new Models.Column
             {
                 BoardId = boardId,
-                Title = columnDto.Title,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                Title = columnDto.Title
             };
 
             var createdColumn = await _columnRepository.CreateColumnAsync(column);

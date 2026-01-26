@@ -83,9 +83,7 @@ namespace Kanban_backend.Controllers
             {
                 Title = createKanbanTaskDto.Title,
                 Description = createKanbanTaskDto.Description,
-                ColumnId = columnId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                ColumnId = columnId
             };
 
             var createdKanbanTask = await _kanbanTaskRepository.CreateKanbanTaskAsync(kanbanTask);

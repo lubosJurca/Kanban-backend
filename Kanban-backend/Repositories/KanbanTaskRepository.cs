@@ -38,6 +38,8 @@ namespace Kanban_backend.Repositories
                 .MaxAsync(kt => (int?)kt.Order) ?? 0; // Get the highest order value or 0 if none exist
 
             kanbanTask.Order = maxOrder + 1; // Set the new task's order to be the highest + 1
+            kanbanTask.CreatedAt = DateTime.UtcNow;
+            kanbanTask.UpdatedAt = DateTime.UtcNow;
             _kanbanTaskContext.KanbanTasks.Add(kanbanTask);
             await _kanbanTaskContext.SaveChangesAsync();
             return kanbanTask; 
@@ -73,6 +75,7 @@ namespace Kanban_backend.Repositories
             {
                 var kanbanTask = kanbanTasks.First(c => c.Id == reorderDtos.Ids[i]);
                 kanbanTask.Order = i + 1;
+                kanbanTask.UpdatedAt = DateTime.UtcNow;
             }
 
             await _kanbanTaskContext.SaveChangesAsync();

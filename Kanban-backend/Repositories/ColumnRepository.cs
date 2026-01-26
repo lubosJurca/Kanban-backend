@@ -73,7 +73,8 @@ namespace Kanban_backend.Repositories
             for (int i = 0; i < reorderDtos.Ids.Count; i++)
             {
                 var column = columns.First(c => c.Id == reorderDtos.Ids[i]);
-                column.Order = i + 1;  
+                column.Order = i + 1;
+                column.UpdatedAt = DateTime.UtcNow;
             }
 
             await _columnContext.SaveChangesAsync();
