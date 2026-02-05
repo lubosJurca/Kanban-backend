@@ -1,6 +1,6 @@
 ﻿namespace Kanban_backend.Models
 {
-    public class Board
+    public class Board : ITimestampedEntity
     {
         public int Id { get; set; }
         public int UserId {  get; set;  }

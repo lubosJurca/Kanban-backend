@@ -37,8 +37,6 @@ namespace Kanban_backend.Repositories
                                 .MaxAsync(sub => (int?)sub.Order) ?? 0;
 
             subtask.Order = maxOrder + 1;
-            subtask.CreatedAt = DateTime.UtcNow;
-            subtask.UpdatedAt = DateTime.UtcNow;
             _subtaskContext.Subtasks.Add(subtask);
             await _subtaskContext.SaveChangesAsync();
             return subtask;
@@ -47,7 +45,6 @@ namespace Kanban_backend.Repositories
         // -------------------- UPDATE SUBTASK --------------------
         public async Task<Subtask?> UpdateSubtaskAsync(Subtask subtask)
         {
-            subtask.UpdatedAt = DateTime.UtcNow;
             await _subtaskContext.SaveChangesAsync();
             return subtask;
         }
@@ -73,7 +70,6 @@ namespace Kanban_backend.Repositories
             {
                 var subtask = subtasks.First(c => c.Id == reorderDtos.Ids[i]);
                 subtask.Order = i + 1;
-                subtask.UpdatedAt = DateTime.UtcNow;
             }
             await _subtaskContext.SaveChangesAsync();
             return subtasks;

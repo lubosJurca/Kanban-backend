@@ -1,6 +1,6 @@
 ﻿namespace Kanban_backend.Models
 {
-    public class Subtask
+    public class Subtask : ITimestampedEntity
     {
         public int Id { get; set; }
         public int KanbanTaskId { get; set; }

@@ -15,8 +15,6 @@ namespace Kanban_backend.Repositories
 
         public async Task<Board> CreateBoardAsync(Board board)
         {
-            board.CreatedAt = DateTime.UtcNow;
-            board.UpdatedAt = DateTime.UtcNow;
             _boardContext.Boards.Add(board);
             await _boardContext.SaveChangesAsync();
             return board;
@@ -52,7 +50,6 @@ namespace Kanban_backend.Repositories
 
         public async Task<Board?> UpdateBoardAsync(Board board)
         {
-            board.UpdatedAt = DateTime.UtcNow;
             await _boardContext.SaveChangesAsync(); // EF Core is tracking board and makes the update automatically, no need to call Update method
 
             return board;

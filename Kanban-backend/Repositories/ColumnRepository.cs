@@ -37,8 +37,6 @@ namespace Kanban_backend.Repositories
                 .MaxAsync(c => (int?)c.Order) ?? 0; // Get the highest order value or 0 if none exist
 
             column.Order = maxOrder + 1;
-            column.CreatedAt = DateTime.UtcNow;
-            column.UpdatedAt = DateTime.UtcNow;
             _columnContext.Columns.Add(column); // No need for await here because we just need to add the object to the EF Core change tracker
             await _columnContext.SaveChangesAsync(); // This is where the actual database operation happens
             return column;
@@ -74,7 +72,6 @@ namespace Kanban_backend.Repositories
             {
                 var column = columns.First(c => c.Id == reorderDtos.Ids[i]);
                 column.Order = i + 1;
-                column.UpdatedAt = DateTime.UtcNow;
             }
 
             await _columnContext.SaveChangesAsync();
