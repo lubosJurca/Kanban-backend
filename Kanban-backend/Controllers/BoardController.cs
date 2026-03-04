@@ -1,47 +1,64 @@
 ﻿using Kanban_backend.DTOs;
 using Kanban_backend.Models;
 using Kanban_backend.Repositories;
+using Kanban_backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Kanban_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BoardController : ControllerBase
     {
         private readonly IBoardRepository _boardRepository;
-        public BoardController(IBoardRepository boardRepository)
+        private readonly IAuthService _authorizationService;
+        public BoardController(IBoardRepository boardRepository, IAuthService authorizationService)
         {
             _boardRepository = boardRepository;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BoardDto>>> GetAllBoards() {
-            int userId = 1; // Temporary hardcoded user ID
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)); // Thanks to the Authorize attribute, we can safely assume that the user is authenticated and has a NameIdentifier claim
 
-            //TODO: Replace with actual user ID from authentication context
-
-            var boards = await _boardRepository.GetAllByUserAsync(userId);
-
-           var boardDtos = boards.Select(board => new BoardDto
+            try
             {
-                Id = board.Id,
-                Title = board.Title,
-                UserId = board.UserId,
-                CreatedAt = board.CreatedAt,
-                UpdatedAt = board.UpdatedAt
-            });
+                var boards = await _boardRepository.GetAllByUserAsync(userId);
 
-            return Ok(boardDtos);
+                var boardDtos = boards.Select(board => new BoardDto
+                {
+                    Id = board.Id,
+                    Title = board.Title,
+                    UserId = board.UserId,
+                    CreatedAt = board.CreatedAt,
+                    UpdatedAt = board.UpdatedAt
+                });
+
+                return Ok(boardDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {message = "An error occurred"});
+            }
+
+            
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<BoardDto>> GetBoardById(int id)
         {
-            var board = await _boardRepository.GetBoardByIdAsync(id);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (board == null) return NotFound();
+            var hasAccess = await _authorizationService.HasAccessToBoard(userId, id);
+
+            if (!hasAccess) return NotFound();
+
+            var board = await _boardRepository.GetBoardByIdAsync(id);
 
             var boardDto = new BoardDto
             {
@@ -58,11 +75,13 @@ namespace Kanban_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<BoardDto>> CreateBoard(CreateBoardDto dto)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var board = new Board
             {
                 Title = dto.Title,
-                UserId = 1 // Temporary hardcoded user ID
-                
+                UserId = userId
+
             }; 
             var boardToCreate = await _boardRepository.CreateBoardAsync(board);
 
@@ -73,9 +92,9 @@ namespace Kanban_backend.Controllers
                 UserId = boardToCreate.UserId,
                 CreatedAt = boardToCreate.CreatedAt,
                 UpdatedAt = boardToCreate.UpdatedAt
+
             };
 
-            //TODO: Replace with actual user ID from authentication context
             return CreatedAtAction(nameof(GetBoardById), new { id = boardDto.Id }, boardDto);
 
         }
@@ -83,13 +102,13 @@ namespace Kanban_backend.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<BoardDto>> UpdateBoard(int id,UpdateBoardDto dto)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var hasAccess = await _authorizationService.HasAccessToBoard(userId, id);
+
+            if (!hasAccess) return NotFound();
 
             var boardToUpdate = await _boardRepository.GetBoardByIdAsync(id);
-
-            if (boardToUpdate == null)
-            {
-                return NotFound($"Board with id {id} not found");
-            }
 
             boardToUpdate.Title = dto.Title;
 
@@ -110,9 +129,13 @@ namespace Kanban_backend.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<BoardDto>> DeleteBoardById(int id)
         {
-            var deletedBoard = await _boardRepository.DeleteBoardAsync(id);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (deletedBoard == null) return NotFound();
+            var hasAccess = await _authorizationService.HasAccessToBoard(userId, id);
+
+            if (!hasAccess) return NotFound();
+
+            var deletedBoard = await _boardRepository.DeleteBoardAsync(id);
 
             var deletedBoardDto = new BoardDto
             {
@@ -124,5 +147,6 @@ namespace Kanban_backend.Controllers
             };
             return Ok(deletedBoardDto);
         }
+
     }
 }

@@ -2,16 +2,19 @@
 using Kanban_backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Kanban_backend.DTOs;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kanban_backend.Controllers
 {
     [Route("api/board/{boardId}/column")]
     [ApiController]
+    [Authorize]
     public class ColumnController : ControllerBase
     {
         private readonly IColumnRepository _columnRepository;
-        private readonly IAuthorizationService _authorizationService;
-        public ColumnController(IColumnRepository columnRepository, IAuthorizationService authorizationService)
+        private readonly IAuthService _authorizationService;
+        public ColumnController(IColumnRepository columnRepository, IAuthService authorizationService)
         {
             _columnRepository = columnRepository;
             _authorizationService = authorizationService;
@@ -21,7 +24,8 @@ namespace Kanban_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ColumnDto>>> GetAllColumns(int boardId)
         {
-            var userId = 1; // Temporary hardcoded user ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var hasAccess = await _authorizationService.HasAccessToBoard(userId, boardId);
 
             if (!hasAccess) return NotFound(); // Return 404 to avoid leaking information about the existence of the board
@@ -46,7 +50,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/column/{columnId}", Name = "GetSingleColumn")] // No need for boardId here
         public async Task<ActionResult<ColumnDto>> GetSingleColumnAsync(int columnId)
         {
-            var userId = 1; // Temporary hardcoded user ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
 
             if (!hasAccess) return NotFound(); // Return 404 to avoid leaking information about the existence of the column
@@ -72,8 +76,8 @@ namespace Kanban_backend.Controllers
         // ------------------------------- CREATE COLUMN -------------------------------
         [HttpPost]
         public async Task<ActionResult<ColumnDto>> CreateColumnAsync(CreateColumnDto columnDto,int boardId) 
-        { 
-            var userId = 1;
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToBoard(userId, boardId);
 
             if (!hasAccess) return NotFound();
@@ -103,12 +107,13 @@ namespace Kanban_backend.Controllers
         [Route("/api/column/{columnId}")]
         public async Task<ActionResult<ColumnDto>> UpdateColumnAsync(int columnId, UpdateColumnDto updateColumnDto)
         {
-            var userId = 1; // Temporary hardcoded user ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
 
             if (!hasAccess) return NotFound(); // Return 404 to avoid leaking information about the existence of the column
 
             var column = await _columnRepository.GetColumnByIdAsync(columnId);
+            if (column == null) return NotFound();
             column.Title = updateColumnDto.Title;
 
             var updatedColumn = await _columnRepository.UpdateColumnAsync(column);
@@ -131,7 +136,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/column/{columnId}")]
         public async Task<ActionResult<ColumnDto>> DeleteColumnAsync(int columnId)
         {
-            var userId = 1; // Temporary hardcoded user ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
 
             if (!hasAccess) return NotFound();
@@ -156,7 +161,7 @@ namespace Kanban_backend.Controllers
         [HttpPut("reorder")]
         public async Task<ActionResult<IEnumerable<ColumnDto>>> ReorderColumnsByIdsAsync(int boardId, ReorderDto reorderDtos)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToBoard(userId, boardId);
 
             if (!hasAccess) return NotFound();

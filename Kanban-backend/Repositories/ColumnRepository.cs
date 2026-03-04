@@ -45,7 +45,6 @@ namespace Kanban_backend.Repositories
         // ------------------------------- UPDATE COLUMN -------------------------------
         public async Task<Column?> UpdateColumnAsync(Column column)
         {
-            column.UpdatedAt = DateTime.UtcNow;
             await _columnContext.SaveChangesAsync();
             return column;
         }

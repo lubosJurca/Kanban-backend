@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kanban_backend.Services
 {
-    public class AuthorizationService : IAuthorizationService
+    public class AuthService : IAuthService
     {
 
         private readonly AppDbContext _context;
 
-        public AuthorizationService(AppDbContext context)
+        public AuthService(AppDbContext context)
         {
             _context = context;
         }

@@ -1,6 +1,6 @@
 ﻿namespace Kanban_backend.Services
 {
-    public interface IAuthorizationService
+    public interface IAuthService
     {
         Task<bool> HasAccessToBoard(int userId, int boardId);
         Task<bool> HasAccessToColumn(int userId, int columnId);

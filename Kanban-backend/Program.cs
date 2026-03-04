@@ -29,6 +29,10 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 
     options.SignIn.RequireConfirmedEmail = false; //Default value is false, this is just for clarity and for learning purposes
     options.SignIn.RequireConfirmedAccount = false; //Default value is false, this is just for clarity and for learning purposes
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); //Lockout for 15 minutes after failed attempts
+    options.Lockout.MaxFailedAccessAttempts = 5; //Lockout after 5 failed attempts
+    options.Lockout.AllowedForNewUsers = true; //Allow lockout for new users
 })
     .AddEntityFrameworkStores<AppDbContext>() //Use the AppDbContext for Identity
     .AddDefaultTokenProviders(); //Add default token providers for password reset, email confirmation, etc.
@@ -79,7 +83,7 @@ builder.Services.AddScoped<IBoardRepository, BoardRepository >();
 builder.Services.AddScoped<IColumnRepository, ColumnRepository>();
 builder.Services.AddScoped<IKanbanTaskRepository, KanbanTaskRepository>();
 builder.Services.AddScoped<ISubtaskRepository, SubtaskRepository>();
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // ==================================================================
 // =================== Add Controllers support ===================

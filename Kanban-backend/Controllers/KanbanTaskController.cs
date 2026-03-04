@@ -3,16 +3,19 @@ using Kanban_backend.Models;
 using Kanban_backend.Repositories;
 using Kanban_backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kanban_backend.Controllers
 {
     [Route("api/column/{columnId}/kanban-task")]
     [ApiController]
+    [Authorize]
     public class KanbanTaskController : ControllerBase
     {
         private readonly IKanbanTaskRepository _kanbanTaskRepository;
-        private readonly IAuthorizationService _authorizationService;
-        public KanbanTaskController(IKanbanTaskRepository kanbanTaskRepository, IAuthorizationService authorizationService)
+        private readonly IAuthService _authorizationService;
+        public KanbanTaskController(IKanbanTaskRepository kanbanTaskRepository, IAuthService authorizationService)
         {
             _kanbanTaskRepository = kanbanTaskRepository;
             _authorizationService = authorizationService;
@@ -22,7 +25,7 @@ namespace Kanban_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<KanbanTaskDto>>> GetAllTasksByColumnIdAsync(int columnId) 
         {
-            var userId = 1; // To be replaced with actual user identification logic
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
 
             if (!hasAccess)
@@ -51,7 +54,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/kanban-task/{kanbanTaskId}", Name = "GetSingleKanbanTaskByIdAsync")] // No need for columnId here
         public async Task<ActionResult<KanbanTaskDto>> GetSingleKanbanTaskByIdAsync(int kanbanTaskId)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
 
@@ -75,7 +78,7 @@ namespace Kanban_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<KanbanTaskDto>> CreateKanbanTaskAsync(CreateKanbanTaskDto createKanbanTaskDto,int columnId)
         {
-            var userId = 1; // To be replaced with actual user identification logic
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
             if (!hasAccess) return NotFound();
 
@@ -107,7 +110,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/kanban-task/{kanbanTaskId}")]
         public async Task<ActionResult<KanbanTaskDto>> UpdateKanbanTaskAsync(int kanbanTaskId, UpdateKanbanTaskDto updateKanbanTaskDto)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
 
@@ -137,7 +140,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/kanban-task/{kanbanTaskId}")]
         public async Task<ActionResult<KanbanTaskDto>> DeleteKanbanTaskAsync(int kanbanTaskId)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
             var deletedKanbanTask = await _kanbanTaskRepository.DeleteKanbanTaskAsync(kanbanTaskId);
@@ -160,7 +163,7 @@ namespace Kanban_backend.Controllers
         [HttpPut("reorder")]
         public async Task<ActionResult<IEnumerable<KanbanTaskDto>>> ReorderColumnsByIdsAsync(ReorderDto reorderDto,int columnId)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToColumn(userId, columnId);
             if (!hasAccess) return NotFound();
             var reorderedTasks = await _kanbanTaskRepository.Reorder(columnId, reorderDto);

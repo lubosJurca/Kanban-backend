@@ -2,21 +2,22 @@
 using Kanban_backend.Models;
 using Kanban_backend.Repositories;
 using Kanban_backend.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Kanban_backend.Controllers
 {
     [Route("api/kanban-task/{kanbanTaskId}/subtask")]
     [ApiController]
+    [Authorize]
     public class SubtaskController : ControllerBase
     {
 
         private readonly ISubtaskRepository _subtaskRepository;
-        private readonly IAuthorizationService _authorizationService;
+        private readonly IAuthService _authorizationService;
 
-        public SubtaskController(ISubtaskRepository subtaskRepository, IAuthorizationService authorizationService)
+        public SubtaskController(ISubtaskRepository subtaskRepository, IAuthService authorizationService)
         {
             _subtaskRepository = subtaskRepository;
             _authorizationService = authorizationService;
@@ -26,7 +27,7 @@ namespace Kanban_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SubtaskDto>>> GetAllSubtaskByKanbanTaskIdAsync(int kanbanTaskId)
         {
-            var userId = 1; // To be replaced with actual user identification logic
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
 
@@ -51,7 +52,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/subtask/{subtaskId}", Name = "GetSingleSubtaskByIdAsync")] // No need for kanbanTaskId here
         public async Task<ActionResult<SubtaskDto>> GetSingleSubtaskByIdAsync(int subtaskId)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToSubtask(userId, subtaskId);
             if (!hasAccess) return NotFound();
 
@@ -76,7 +77,7 @@ namespace Kanban_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<SubtaskDto>> CreateSubtaskAsync(int kanbanTaskId, CreateSubtaskDto subtaskDto)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
 
@@ -110,7 +111,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/subtask/{subtaskId}")]
         public async Task<ActionResult<SubtaskDto>> UpdateSubtaskAsync(int subtaskId, UpdateSubtaskDto subtaskDto)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToSubtask(userId, subtaskId);
             if (!hasAccess) return NotFound();
 
@@ -138,7 +139,7 @@ namespace Kanban_backend.Controllers
         [Route("/api/subtask/{subtaskId}")]
         public async Task<ActionResult<SubtaskDto>> DeleteSubtaskAsync(int subtaskId)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToSubtask(userId, subtaskId);
             if (!hasAccess) return NotFound();
             var deletedSubtask = await _subtaskRepository.DeleteSubtaskAsync(subtaskId);
@@ -162,7 +163,7 @@ namespace Kanban_backend.Controllers
         [HttpPut("reorder")]
         public async Task<ActionResult<IEnumerable<SubtaskDto>>> ReorderSubtasksAsync(int kanbanTaskId, ReorderDto reorderDto)
         {
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var hasAccess = await _authorizationService.HasAccessToKanbanTask(userId, kanbanTaskId);
             if (!hasAccess) return NotFound();
 
