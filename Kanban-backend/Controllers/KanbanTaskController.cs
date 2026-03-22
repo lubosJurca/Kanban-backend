@@ -119,6 +119,13 @@ namespace Kanban_backend.Controllers
             kanbanTask.Title = updateKanbanTaskDto.Title;
             kanbanTask.Description = updateKanbanTaskDto.Description;
 
+            if(updateKanbanTaskDto.ColumnId.HasValue && updateKanbanTaskDto.ColumnId.Value != kanbanTask.ColumnId){
+                var hassAccessToNewColumn = await _authorizationService.HasAccessToColumn(userId, updateKanbanTaskDto.ColumnId.Value);
+                if (!hassAccessToNewColumn) return NotFound();
+
+                kanbanTask.ColumnId = updateKanbanTaskDto.ColumnId.Value;
+            }
+
             var updatedKanbanTask = await _kanbanTaskRepository.UpdateKanbanTaskAsync(kanbanTask);
 
             var kanbanTaskDto = new KanbanTaskDto

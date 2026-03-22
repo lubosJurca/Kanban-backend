@@ -74,8 +74,7 @@ namespace Kanban_backend.Repositories
             }
 
             await _columnContext.SaveChangesAsync();
-            
-            return columns;
+			return columns.OrderBy(c => c.Order).ToList();
 
         }
 

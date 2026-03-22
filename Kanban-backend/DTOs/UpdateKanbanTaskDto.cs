@@ -9,5 +9,6 @@ namespace Kanban_backend.DTOs
         [MaxLength(30, ErrorMessage = "Title can't exceed 30 characters")]
         public required string Title { get; set; }
         public string Description { get; set; } = string.Empty;
+        public int? ColumnId { get; set; }
     }
 }

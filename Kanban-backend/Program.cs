@@ -41,8 +41,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     //Cookie Security settings
     options.Cookie.HttpOnly = true; // Cookie accessible only via HTTP(S), not JavaScript - helps prevent XSS attacks
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Cookie only sent over HTTPS
-    options.Cookie.SameSite = SameSiteMode.None; //Cookie sent with cross-site requests - when frontend and backend are on different domains
+	options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+	 ? CookieSecurePolicy.SameAsRequest
+	 : CookieSecurePolicy.Always; // Cookie only sent over HTTPS
+	options.Cookie.SameSite = SameSiteMode.None; //Cookie sent with cross-site requests - when frontend and backend are on different domains
     options.Cookie.Name = "KanbanAuthCookie"; //Custom cookie name
 
     //Cookie lifetime settings
@@ -69,7 +71,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // Frontend URL
+        policy.WithOrigins("https://localhost:4200") // Frontend URL
                 .AllowAnyHeader() // Allow any http headers
                 .AllowAnyMethod() // Allow any http methods (GET, POST, etc.)
                 .AllowCredentials(); // Allow cookies to be sent in cross-origin requests

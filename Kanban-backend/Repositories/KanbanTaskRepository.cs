@@ -75,7 +75,7 @@ namespace Kanban_backend.Repositories
             }
 
             await _kanbanTaskContext.SaveChangesAsync();
-            return kanbanTasks;
+            return kanbanTasks.OrderBy(t => t.Order).ToList();
         }
 
        
