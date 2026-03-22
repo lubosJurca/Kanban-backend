@@ -71,7 +71,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://localhost:4200") // Frontend URL
+        policy.WithOrigins("https://localhost:4200", "https://kanbaan-frontend.vercel.app") // Frontend URL
                 .AllowAnyHeader() // Allow any http headers
                 .AllowAnyMethod() // Allow any http methods (GET, POST, etc.)
                 .AllowCredentials(); // Allow cookies to be sent in cross-origin requests
