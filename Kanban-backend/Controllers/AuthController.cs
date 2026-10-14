@@ -33,7 +33,7 @@ namespace Kanban_backend.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                return BadRequest(new { message = string.Join(" ", result.Errors.Select(e => e.Description)) });
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
